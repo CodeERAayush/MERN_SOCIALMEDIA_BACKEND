@@ -71,3 +71,32 @@ export const likePost = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+
+
+
+export const commentPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId,text } = req.body;
+    
+      const user = await User.findById(userId);
+
+      // console.log("debug: ",id,"xyzz: ",userId,"   ",user?.email)
+      const updatedPost = await Post.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            comments: {
+              $each: [{ userId, username:user.firstName+" "+user.lastName, userImage:user.picturePath, text }],
+              $position: 0
+            }
+          }
+        },
+        { new: true }
+      );
+    res.status(200).json(updatedPost);
+  } catch (err) {
+    // console.log("error: ",err)
+    res.status(404).json({ message: err.message });
+  }
+};
